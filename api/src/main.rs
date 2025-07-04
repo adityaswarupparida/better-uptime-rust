@@ -6,7 +6,14 @@
 //     Ok(())
 // }
 
-use poem::{get, post, handler, listener::TcpListener, web::Path, Route, Server};
+use poem::{get, handler, listener::TcpListener, post, web::{Json, Path}, Route, Server};
+use store::Store;
+
+use crate::{requests_input::CreateWebsiteInput, requests_output::CreateWebsiteOutput};
+
+pub mod requests_input;
+pub mod requests_output;
+
 
 #[handler]
 fn get_website(Path(website_id): Path<String>) -> String {
@@ -14,8 +21,16 @@ fn get_website(Path(website_id): Path<String>) -> String {
 }
 
 #[handler]
-fn create_website(Path(website_id): Path<String>) -> String {
-    format!("hello: {}", website_id)
+fn create_website(Json(data):Json<CreateWebsiteInput>) -> Json<CreateWebsiteOutput> {
+    // format!("hello: {}", website_id)
+    let url = data.url;
+    let s = Store{};
+    s.create_website();
+    let response = CreateWebsiteOutput {
+        id: url
+    };
+
+    Json(response) 
 }
 
 
