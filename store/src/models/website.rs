@@ -6,9 +6,9 @@ use uuid::Uuid;
 #[diesel(table_name = crate::schema::website)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 
-struct Website {
+pub struct Website {
     id: String,
-    url: String,
+    pub url: String,
     user_id: String
 }
 
@@ -28,18 +28,15 @@ impl Store {
         // print!("create user called")
         Ok(id.to_string())
     }
-    pub fn get_website(&mut self, URL: String, user: String) -> Result<bool, Box<dyn std::error::Error>> {
+    pub fn get_website(&mut self, id: String) -> Result<Website, Box<dyn std::error::Error>> {
         // String::from("1")
         let results = website::table
-            .filter(website::url.eq(URL))
+            .filter(website::id.eq(id))
             // .limit(5)
             .select(Website::as_select())
             .first(&mut self.conn)?;
             // .expect("Error loading posts");
 
-        if results.user_id != user {
-            return Ok(false);
-        }
-        Ok(true)
+        Ok(results)
     }
 }
