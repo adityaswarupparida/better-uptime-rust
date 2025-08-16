@@ -23,7 +23,7 @@ pub fn create_website(Json(data):Json<CreateWebsiteInput>, Data(s):Data<&Arc<Mut
     let mut ls = s.lock().unwrap();
     let id = ls.create_website(url, String::from("b13f8e5a-5be4-496b-8a4f-257e3f269f7f")).unwrap();
     let response = CreateWebsiteOutput {
-        id: id
+        id
     };
 
     Json(response) 

@@ -1,11 +1,10 @@
-use diesel::prelude::*;
+use diesel::{prelude::*};
 use uuid::Uuid;
 use crate::{schema::user, store::Store};
 
 #[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::user)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-
 struct User {
     id: String,
     username: String,
@@ -28,7 +27,7 @@ impl Store {
         Ok(id.to_string())
 
     }
-    pub fn get_user(&mut self, uname: String, pwd: String) -> Result<bool, Box<dyn std::error::Error>> {
+    pub fn get_user(&mut self, uname: String, pwd: String) -> Result<String, Box<dyn std::error::Error>> {
         // String::from("1")
         let results = user::table
             .filter(user::username.eq(uname))
@@ -38,8 +37,8 @@ impl Store {
             // .expect("Error loading posts");
 
         if results.password != pwd {
-            return Ok(false);
+            return Err(Box::new(diesel::result::Error::NotFound));
         }
-        Ok(true)
+        Ok(results.id)
     }
 }

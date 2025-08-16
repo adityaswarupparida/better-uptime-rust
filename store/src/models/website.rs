@@ -1,11 +1,10 @@
-use crate::{schema::website, store::Store};
 use diesel::prelude::*;
 use uuid::Uuid;
+use crate::{schema::website, store::Store};
 
 #[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::website)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-
 pub struct Website {
     id: String,
     pub url: String,
