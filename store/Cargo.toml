@@ -8,3 +8,4 @@ chrono = "0.4.41"
 diesel = { version="2.2.11", features=["postgres", "chrono"] }
 dotenvy = "0.15.7"
 uuid = { version="1.17.0", features=["v4"] }
+bcrypt = "0.17"

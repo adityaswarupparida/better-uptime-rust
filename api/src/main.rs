@@ -8,6 +8,7 @@
 
 use std::sync::{Arc, Mutex};
 
+use dotenvy::dotenv;
 use poem::{get, post, listener::TcpListener, EndpointExt, Route, Server};
 use store::store::Store;
 
@@ -23,6 +24,7 @@ pub mod auth_middleware;
 #[tokio::main(flavor="multi_thread")]
 async fn main() -> Result<(), std::io::Error> {
     let s = Arc::new(Mutex::new(Store::default()));
+    dotenv().ok();
 
     let app = Route::new()
         .at("/status/:website_id", get(get_website))

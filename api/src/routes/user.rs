@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::{env, sync::{Arc, Mutex}};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use poem::{handler, http::StatusCode, web::{Data, Json}, Error};
 use serde::{Deserialize, Serialize};
@@ -53,7 +53,9 @@ pub fn get_user(Json(data):Json<CreateUserInput>, Data(s):Data<&Arc<Mutex<Store>
                 sub: user_id,
                 exp: 1111111111111111
             };
-            let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret("secret".as_ref()))
+
+            let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
+            let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref()))
                 .map_err(|_| Error::from_status(StatusCode::UNAUTHORIZED))?;
             let response = SignInUserOutput {
                 jwt: token

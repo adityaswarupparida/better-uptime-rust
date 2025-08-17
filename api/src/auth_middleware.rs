@@ -1,3 +1,5 @@
+use std::env;
+
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use poem::{http::StatusCode, Error, FromRequest, Request, RequestBody, Result};
 
@@ -14,7 +16,8 @@ impl <'a> FromRequest<'a> for UserId {
             .ok_or_else(|| Error::from_string("missing token", StatusCode::BAD_REQUEST))?;
         // println!("{}", token);
 
-        let token_data = decode::<Claims>(&token, &DecodingKey::from_secret("secret".as_ref()), &Validation::default())
+        let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
+        let token_data = decode::<Claims>(&token, &DecodingKey::from_secret(secret.as_ref()), &Validation::default())
                 .map_err(|e| {
                     eprintln!("{}", e);
                     Error::from_string("token malformed", StatusCode::UNAUTHORIZED)

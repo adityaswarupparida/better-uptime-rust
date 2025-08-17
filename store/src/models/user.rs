@@ -1,5 +1,6 @@
 use diesel::{prelude::*};
 use uuid::Uuid;
+use bcrypt::{DEFAULT_COST, hash, verify};
 use crate::{schema::user, store::Store};
 
 #[derive(Queryable, Selectable, Insertable)]
@@ -14,10 +15,13 @@ struct User {
 impl Store {
     pub fn create_user(&mut self, username: String, password: String) -> Result<String, Box<dyn std::error::Error>> {
         let id = Uuid::new_v4();
+        // hash the password
+        let hashed_password = hash(password, DEFAULT_COST)?;
+
         let records = User {
             id: id.to_string(),
             username,
-            password
+            password: hashed_password
         };
         diesel::insert_into(user::table)
             .values(&records)
@@ -36,9 +40,10 @@ impl Store {
             .first(&mut self.conn)?;
             // .expect("Error loading posts");
 
-        if results.password != pwd {
-            return Err(Box::new(diesel::result::Error::NotFound));
-        }
+        verify(pwd, &results.password)?;
+        // if results.password != pwd {
+        //     return Err(Box::new(diesel::result::Error::NotFound));
+        // }
         Ok(results.id)
     }
 }
