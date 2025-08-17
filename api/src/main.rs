@@ -17,6 +17,7 @@ use crate::routes::{user::{create_user, get_user}, website::{create_website, get
 pub mod requests_input;
 pub mod requests_output;
 pub mod routes;
+pub mod auth_middleware;
 
 
 #[tokio::main(flavor="multi_thread")]
@@ -27,7 +28,7 @@ async fn main() -> Result<(), std::io::Error> {
         .at("/status/:website_id", get(get_website))
         .at("/website", post(create_website))
         .at("/user/signup", post(create_user))
-        .at("/user/signin", get(get_user))
+        .at("/user/signin", post(get_user))
         .data(s);
     Server::new(TcpListener::bind("0.0.0.0:3001"))
       .run(app)

@@ -6,9 +6,9 @@ use crate::{schema::website, store::Store};
 #[diesel(table_name = crate::schema::website)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Website {
-    id: String,
+    pub id: String,
     pub url: String,
-    user_id: String
+    pub user_id: String
 }
 
 impl Store {
@@ -27,10 +27,11 @@ impl Store {
         // print!("create user called")
         Ok(id.to_string())
     }
-    pub fn get_website(&mut self, id: String) -> Result<Website, Box<dyn std::error::Error>> {
+    pub fn get_website(&mut self, id: String, user_id: String) -> Result<Website, Box<dyn std::error::Error>> {
         // String::from("1")
         let results = website::table
             .filter(website::id.eq(id))
+            .filter(website::user_id.eq(user_id))
             // .limit(5)
             .select(Website::as_select())
             .first(&mut self.conn)?;

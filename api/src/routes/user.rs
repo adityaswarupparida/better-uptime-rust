@@ -6,22 +6,41 @@ use store::store::Store;
 
 use crate::{requests_input::CreateUserInput, requests_output::{CreateUserOutput, SignInUserOutput}};
 
+#[derive(Serialize)]
+struct ErrorResponse {
+    error: String,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    sub: String,
+pub struct Claims {
+    pub sub: String,
     exp: usize,
 }
 
 #[handler]
 pub fn create_user(Json(data):Json<CreateUserInput>, Data(s):Data<&Arc<Mutex<Store>>>) -> Result<Json<CreateUserOutput>, Error> {
     let mut ls = s.lock().unwrap();
-    let id = ls.create_user(data.username, data.password)
-        .map_err(|_| Error::from_status(StatusCode::CONFLICT))?;
-    let response = CreateUserOutput {
-        id
-    };
+    // let id = ls.create_user(data.username, data.password)
+    //     .map_err(|_| Error::from_status(StatusCode::CONFLICT))?;
+    // let response = CreateUserOutput {
+    //     id
+    // };
 
-    Ok(Json(response))
+    // Ok(Json(response))
+
+    match ls.create_user(data.username, data.password) {
+        Ok(id) => {
+            let response = CreateUserOutput { id };
+            Ok(Json(response))
+        },
+        Err(e) => {
+            // return 409 Conflict with error message
+            let error_response = ErrorResponse {
+                error: format!("{}", e),
+            };
+            Err(poem::Error::from_string(error_response.error, StatusCode::CONFLICT))
+        }
+    }
 }
 
 #[handler]
@@ -32,7 +51,7 @@ pub fn get_user(Json(data):Json<CreateUserInput>, Data(s):Data<&Arc<Mutex<Store>
         Ok(user_id) => {
             let my_claims = Claims{
                 sub: user_id,
-                exp: 1111111
+                exp: 1111111111111111
             };
             let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret("secret".as_ref()))
                 .map_err(|_| Error::from_status(StatusCode::UNAUTHORIZED))?;
